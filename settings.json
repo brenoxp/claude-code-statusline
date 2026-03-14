@@ -1,0 +1,8 @@
+{
+  "debug": false,
+  "testMode": false,
+  "log": false,
+  "maxLineWidth": 70,
+  "minPromptLineWidth": 40,
+  "cacheWrite": true
+}

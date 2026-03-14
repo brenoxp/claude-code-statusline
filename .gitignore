@@ -1,0 +1,9 @@
+.cache/
+*.log
+.DS_Store
+node_modules/
+.env
+logs/
+bun.lock
+dist/
+.claude/settings.local.json

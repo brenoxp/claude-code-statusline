@@ -1,0 +1,20 @@
+{
+  "session_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "transcript_path": "~/.claude/projects/myapp/f47ac10b-58cc-4372-a567-0e02b2c3d479.jsonl",
+  "cwd": "~/projects/myapp",
+  "model": { "id": "claude-opus-4-1-20250805", "display_name": "Opus 4.1" },
+  "workspace": {
+    "current_dir": "~/projects/myapp",
+    "project_dir": "~/projects/myapp"
+  },
+  "version": "1.0.108",
+  "output_style": { "name": "default" },
+  "cost": {
+    "total_cost_usd": 1.58,
+    "total_duration_ms": 2802437,
+    "total_api_duration_ms": 430493,
+    "total_lines_added": 442,
+    "total_lines_removed": 52
+  },
+  "exceeds_200k_tokens": false
+}

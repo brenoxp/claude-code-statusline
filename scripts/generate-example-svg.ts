@@ -104,9 +104,12 @@ function parseAnsiToSpans(ansiStr: string): StyledSpan[][] {
 
 function dimColor(color: string): string {
   if (!color.startsWith("#") || color.length !== 7) return color;
-  const r = Math.round(parseInt(color.slice(1, 3), 16) * 0.6);
-  const g = Math.round(parseInt(color.slice(3, 5), 16) * 0.6);
-  const b = Math.round(parseInt(color.slice(5, 7), 16) * 0.6);
+  // Blend toward a visible dim gray floor so dark colors stay readable on dark bg
+  const floor = 0x50;
+  const blend = (ch: number) => Math.max(floor, Math.round(ch * 0.75));
+  const r = blend(parseInt(color.slice(1, 3), 16));
+  const g = blend(parseInt(color.slice(3, 5), 16));
+  const b = blend(parseInt(color.slice(5, 7), 16));
   return `#${hex(r)}${hex(g)}${hex(b)}`;
 }
 

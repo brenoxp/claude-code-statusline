@@ -14,40 +14,38 @@
   <text x="142" y="82" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
   <text x="150.4" y="82" fill="#b5e7c7" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">●</text>
   <text x="158.8" y="82" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
-  <text x="167.20000000000002" y="82" fill="#75757e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">○ ○ ○ ○ ○ ○</text>
+  <text x="167.20000000000002" y="82" fill="#92929e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">○ ○ ○ ○ ○ ○</text>
   <text x="259.6" y="82" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
   <text x="276.40000000000003" y="82" fill="#46c373" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> 34%</text>
   <text x="310.00000000000006" y="82" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
-  <text x="326.80000000000007" y="82" fill="#3c424e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">68k</text>
+  <text x="326.80000000000007" y="82" fill="#505362" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">68k</text>
   <text x="352.00000000000006" y="82" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">     </text>
   <text x="16" y="102" fill="#96a5be" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">session</text>
   <text x="74.80000000000001" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">   </text>
-  <text x="100.00000000000001" y="102" fill="#46c373" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">● ● ● ●</text>
-  <text x="158.8" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
-  <text x="167.20000000000002" y="102" fill="#6bcf8f" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">●</text>
-  <text x="175.60000000000002" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
-  <text x="184.00000000000003" y="102" fill="#75757e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">○ ○ ○ ○ ○</text>
+  <text x="100.00000000000001" y="102" fill="#f0823c" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">● ● ● ● ● ● ●</text>
+  <text x="209.20000000000002" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
+  <text x="217.60000000000002" y="102" fill="#fdf2eb" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">●</text>
+  <text x="226.00000000000003" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
+  <text x="234.40000000000003" y="102" fill="#92929e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">○ ○</text>
   <text x="259.6" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
-  <text x="276.40000000000003" y="102" fill="#46c373" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> 48%</text>
+  <text x="276.40000000000003" y="102" fill="#f0823c" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> 71%</text>
   <text x="310.00000000000006" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
-  <text x="326.80000000000007" y="102" fill="#3c424e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">2h 38m</text>
+  <text x="326.80000000000007" y="102" fill="#505362" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">1h 28m</text>
   <text x="377.20000000000005" y="102" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">     </text>
   <text x="16" y="122" fill="#96a5be" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">weekly</text>
   <text x="66.4" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">    </text>
-  <text x="100" y="122" fill="#e6b432" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">● ● ● ● ●</text>
-  <text x="175.60000000000002" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
-  <text x="184.00000000000003" y="122" fill="#ebc35b" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">●</text>
-  <text x="192.40000000000003" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
-  <text x="200.80000000000004" y="122" fill="#75757e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">○ ○ ○ ○</text>
+  <text x="100" y="122" fill="#e6b432" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">● ● ● ● ● ●</text>
+  <text x="192.4" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> </text>
+  <text x="200.8" y="122" fill="#92929e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">○ ○ ○ ○</text>
   <text x="259.6" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
-  <text x="276.40000000000003" y="122" fill="#e6b432" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> 58%</text>
+  <text x="276.40000000000003" y="122" fill="#e6b432" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve"> 60%</text>
   <text x="310.00000000000006" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
-  <text x="326.80000000000007" y="122" fill="#3c424e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">1d 6h</text>
+  <text x="326.80000000000007" y="122" fill="#505362" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">1d 5h</text>
   <text x="368.80000000000007" y="122" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">     </text>
   <text x="16" y="142" fill="#a08cdc" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve" font-weight="bold">◆ 7 cli</text>
   <text x="74.80000000000001" y="142" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">  </text>
-  <text x="91.60000000000001" y="142" fill="#3c424e" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">◇ 23 mcp</text>
+  <text x="91.60000000000001" y="142" fill="#505362" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">◇ 23 mcp</text>
   <text x="158.8" y="142" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">     </text>
-  <text x="16" y="162" fill="#24262d" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">11:21 AM</text>
+  <text x="16" y="162" fill="#505050" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">12:31 PM</text>
   <text x="83.2" y="162" fill="#abb2bf" font-family="'SF Mono','Cascadia Code','Fira Code','JetBrains Mono',Menlo,Monaco,Consolas,monospace" font-size="14" xml:space="preserve">     </text>
 </svg>

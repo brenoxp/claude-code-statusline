@@ -25,7 +25,7 @@
 - 5-hour session rate limit with countdown (inverse at 90%+)
 - 7-day weekly rate limit with countdown
 - Number of running Claude Code CLI sessions
-- Number of MCP servers running per session
+- Number of MCP servers running across all sessions
 - Session tasks: last completed + current in progress
 - Last user prompt (truncated, voice input indicator)
 - Clock (12h)

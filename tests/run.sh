@@ -94,7 +94,7 @@ assert_contains "debug shows timing" "$DEBUG_OUTPUT" "total:"
 # ── Sanitization ─────────────────────────────────────────
 echo "sanitization"
 LOCAL_USER=$(whoami)
-LEAKS=$(grep -r "/Users/$LOCAL_USER" "$PROJECT_DIR" \
+LEAKS=$(grep -r "$LOCAL_USER" "$PROJECT_DIR" \
     --include='*.sh' --include='*.json' --include='*.md' --include='*.mjs' --include='*.ts' --include='*.svelte' \
     --exclude-dir=.git --exclude-dir=.cache --exclude-dir=node_modules --exclude-dir=tests \
     --exclude-dir=logs --exclude-dir=.claude --exclude-dir=dist \

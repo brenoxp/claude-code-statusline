@@ -2,7 +2,6 @@ import { exec, spawn } from "node:child_process";
 import {
   existsSync,
   readFileSync,
-  writeFileSync,
   openSync,
   readSync,
   closeSync,
@@ -182,10 +181,8 @@ async function getUsageData() {
 
   if (usageData) {
     const lockFile = join(CACHE_DIR, "usage-fetch.lock");
-    const lockStale = !existsSync(lockFile) || now - fileMtime(lockFile) >= 30;
-    if (now - fileMtime(cacheFile) >= 60 && lockStale) {
-      // Write lock before spawning to prevent concurrent spawns
-      writeFileSync(lockFile, String(process.pid));
+    const lockExists = existsSync(lockFile) && now - fileMtime(lockFile) < 30;
+    if (now - fileMtime(cacheFile) >= 60 && !lockExists) {
       const bundlePath = fileURLToPath(import.meta.url);
       spawn(process.execPath, [bundlePath, "--fetch-usage"], {
         stdio: "ignore",

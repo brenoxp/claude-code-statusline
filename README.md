@@ -33,16 +33,13 @@
 ## Requirements
 
 - macOS (uses `security` for keychain access)
-- [Bun](https://bun.sh/) runtime
+- Node.js 18+
 - Terminal with truecolor (24-bit) support
 
 ## Install
 
 ```bash
-git clone https://github.com/brenoxp/claude-code-statusline.git
-cd claude-code-statusline
-bun install
-bun run build
+npm install -g @brenoxp/cc-statusline
 ```
 
 Add to `~/.claude/settings.json`:
@@ -51,10 +48,33 @@ Add to `~/.claude/settings.json`:
 {
   "statusLine": {
     "type": "command",
-    "command": "bun /path/to/claude-code-statusline/dist/index.js"
+    "command": "cc-statusline"
   }
 }
 ```
+
+<details>
+<summary>Install from source</summary>
+
+Requires [Bun](https://bun.sh/).
+
+```bash
+git clone https://github.com/brenoxp/claude-code-statusline.git
+cd claude-code-statusline
+bun install
+bun run build
+```
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "node /path/to/claude-code-statusline/dist/index.js"
+  }
+}
+```
+
+</details>
 
 ## Settings
 

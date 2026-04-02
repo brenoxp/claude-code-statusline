@@ -47,6 +47,7 @@ await build({
   bundle: true,
   platform: "node",
   format: "esm",
+  banner: { js: "#!/usr/bin/env node" },
   target: "esnext",
   minify: true,
   conditions: ["browser"],

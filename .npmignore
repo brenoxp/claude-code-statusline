@@ -12,6 +12,7 @@ src/
 build.ts
 tsconfig.json
 bun.lock
+examples/
 CLAUDE.md
 examples/CLAUDE.md
 src/components/CLAUDE.md

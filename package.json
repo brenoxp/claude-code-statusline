@@ -1,11 +1,11 @@
 {
   "name": "@brenoxp/cc-statusline",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Custom status line for Claude Code CLI",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "cc-statusline": "dist/index.js"
+    "cc-statusline": "bin/cc-statusline"
   },
   "license": "MIT",
   "repository": {

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Picks bun if on PATH (correct unicode width), else falls back to node.
+# Uses parameter expansion (no external commands) so it works in minimal PATH.
+SCRIPT="$0"
+case "$SCRIPT" in
+  */*) SCRIPT_DIR="${SCRIPT%/*}" ;;
+  *)   SCRIPT_DIR="." ;;
+esac
+exec "$(command -v bun || command -v node)" -- "$SCRIPT_DIR/../dist/index.js" "$@"

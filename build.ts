@@ -47,7 +47,11 @@ await build({
   bundle: true,
   platform: "node",
   format: "esm",
-  banner: { js: "#!/usr/bin/env node" },
+  // Polyglot shebang: shell picks bun if installed, falls back to node.
+  // The second line is a no-op in JS (string + comment) and an exec call in sh.
+  banner: {
+    js: '#!/bin/sh\n":" //; exec "$(command -v bun || command -v node)" -- "$0" "$@"',
+  },
   target: "esnext",
   minify: true,
   conditions: ["browser"],

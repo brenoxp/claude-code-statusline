@@ -36,7 +36,7 @@
 - [Bun](https://bun.sh/) (recommended) or Node.js 18+
 - Terminal with truecolor (24-bit) support
 
-Bun is recommended: nib-ink uses `Bun.stringWidth` on its unicode width fallback path. Under node, a built-in polyfill counts code points instead — works for all input but under-counts wide chars (CJK, emoji), which can cause off-by-one truncation. Stick with bun for pixel-perfect rendering when prompts contain wide chars.
+The bin uses a polyglot shebang that picks bun if it's on PATH, else node. nib-ink uses `Bun.stringWidth` on its unicode width fallback path; under node, a built-in polyfill counts code points instead — works for all input but under-counts wide chars (CJK, emoji), which can cause off-by-one truncation. Install bun for pixel-perfect rendering when prompts contain wide chars; otherwise node is fine.
 
 ## Install
 

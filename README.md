@@ -33,8 +33,10 @@
 ## Requirements
 
 - macOS (uses `security` for keychain access)
-- Node.js 18+
+- [Bun](https://bun.sh/) (recommended) or Node.js 18+
 - Terminal with truecolor (24-bit) support
+
+Bun is recommended: nib-ink uses `Bun.stringWidth` on its unicode width fallback path. Under node, a built-in polyfill counts code points instead — works for all input but under-counts wide chars (CJK, emoji), which can cause off-by-one truncation. Stick with bun for pixel-perfect rendering when prompts contain wide chars.
 
 ## Install
 
@@ -69,7 +71,7 @@ bun run build
 {
   "statusLine": {
     "type": "command",
-    "command": "node /path/to/claude-code-statusline/dist/index.js"
+    "command": "bun /path/to/claude-code-statusline/dist/index.js"
   }
 }
 ```

@@ -1,6 +1,24 @@
 // Claude Code custom statusline - nib-ink (Svelte 5) version
 // Reads JSON from stdin, outputs ANSI-formatted status lines via renderToString
 
+// nib-ink falls back to Bun.stringWidth for any text outside the ASCII printable
+// range + a tiny unicode allowlist. Under node, that throws ReferenceError and
+// the whole statusline disappears as soon as the user types accented/unicode
+// chars (Portuguese é/ã/ç, em dashes, emoji, etc). Polyfill before any nib-ink
+// import touches it.
+const ANSI_RE = /\x1b\[[0-9;]*[a-zA-Z]/g;
+(globalThis as any).Bun ??= {
+  stringWidth(text: string, opts?: { countAnsiEscapeCodes?: boolean }) {
+    const stripped =
+      opts?.countAnsiEscapeCodes === false ? text.replace(ANSI_RE, "") : text;
+    // Count visible code points; treat each as width 1. Good enough for a
+    // truncation budget — wide-char (CJK, emoji) under-counts but doesn't crash.
+    let n = 0;
+    for (const _ of stripped) n++;
+    return n;
+  },
+};
+
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -154,6 +172,7 @@ async function main() {
     if (data.weekly.resetCountdown) ww += 2 + data.weekly.resetCountdown.length;
     lineWidths.push(ww);
   }
+  if (data.usageStaleHint) lineWidths.push(data.usageStaleHint.length);
   // Processes: "◆ X cli" + gap(2) + "◇ X mcp"
   lineWidths.push(
     `◆ ${data.cliCount} cli`.length + 1 + 2 + `◇ ${data.mcpCount} mcp`.length,
@@ -195,6 +214,12 @@ async function main() {
   }
 }
 
+// When invoked with --fetch-usage we're a background usage refresher spawned by
+// data.ts. usage-fetch.ts's module init already ran fetchUsage(); skip main()
+// so it doesn't try to read stdin and crash, killing the in-flight fetch.
+if (process.argv.includes("--fetch-usage")) {
+  // Let fetchUsage's promise complete; node/bun will exit after the event loop drains.
+} else
 main().catch((err) => {
   if (debug)
     process.stderr.write(`statusline error: ${err.stack || err.message}\n`);

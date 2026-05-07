@@ -19,6 +19,7 @@
     cacheWriteTokens,
     session,
     weekly,
+    usageStaleHint,
     cliCount,
     mcpCount,
     completedTask,
@@ -43,6 +44,9 @@
   <ContextBar {modelName} {contextPct} {tokenCount} {cacheWriteTokens} />
   {#if session || weekly}
     <UsageLimits {session} {weekly} />
+  {/if}
+  {#if usageStaleHint}
+    <Text color={toRgb(theme.red)}>{usageStaleHint}</Text>
   {/if}
   <Processes {cliCount} {mcpCount} />
   {#if completedTask || currentTask}

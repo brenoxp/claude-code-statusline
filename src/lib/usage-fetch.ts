@@ -1,11 +1,26 @@
 // Fetches Claude API usage data, caches for 60s
 // Reads OAuth token from: env var > macOS keychain > creds file
+//
+// Recovery / when statusline shows stale or "api-fail":
+//   1) Clear cache state:
+//        rm -f ~/.claude/cache/statusline/usage-fetch.{lock,failtime} \
+//              ~/.claude/cache/statusline/usage.json
+//   2) If API still fails, verify the OAuth token:
+//        security find-generic-password -s "Claude Code-credentials" -w
+//   3) Tail the log to see what the fetcher last did:
+//        tail ~/.claude/cache/statusline/usage-fetch.log
+//
+// Self-healing built in:
+//   - Locks older than LOCK_MAX_AGE (orphaned by SIGKILL) are removed.
+//   - failtime older than FAILTIME_MAX_AGE is treated as expired.
+//   - Log is rotated at LOG_MAX_BYTES so it doesn't grow unbounded.
 
 import { execSync } from "node:child_process";
 import {
   appendFileSync,
   existsSync,
   readFileSync,
+  statSync,
   writeFileSync,
   mkdirSync,
   unlinkSync,
@@ -17,15 +32,29 @@ import { fileMtime, writeFileSafe, readFileSafe } from "./theme";
 
 const CACHE_MAX_AGE = 60;
 const BACKOFF = 300;
+const FAILTIME_MAX_AGE = 3600; // expire orphan failtime after 1h
+const LOCK_MAX_AGE = 30; // hold lock at most 30s; older = orphan
+const LOG_MAX_BYTES = 64 * 1024;
 const CACHE_DIR = join(homedir(), ".claude", "cache", "statusline");
 
 function logEvent(msg: string) {
   const logFile = join(CACHE_DIR, "usage-fetch.log");
   try {
+    mkdirSync(CACHE_DIR, { recursive: true });
+    if (existsSync(logFile)) {
+      try {
+        const size = statSync(logFile).size;
+        if (size > LOG_MAX_BYTES) {
+          // Keep last half: read tail, rewrite
+          const buf = readFileSync(logFile, "utf8");
+          writeFileSync(logFile, buf.slice(-Math.floor(LOG_MAX_BYTES / 2)));
+        }
+      } catch {
+        /* ignore rotation errors */
+      }
+    }
     const ts = new Date().toTimeString().slice(0, 8);
-    writeFileSafe(logFile, "");
-    const existing = readFileSafe(logFile) || "";
-    writeFileSync(logFile, existing + `${ts} ${msg}\n`);
+    appendFileSync(logFile, `${ts} ${msg}\n`);
   } catch {
     /* ignore */
   }
@@ -114,17 +143,34 @@ export async function fetchUsage(): Promise<string | null> {
   const cacheIsFresh = () =>
     existsSync(cacheFile) && now - fileMtime(cacheFile) < CACHE_MAX_AGE;
 
-  // Backoff on recent failure
+  // Backoff on recent failure (expire stale failtime to avoid orphan stuck-state)
   if (existsSync(failFile)) {
     const lastFail = parseInt(readFileSafe(failFile) || "0", 10);
-    if (now - lastFail < BACKOFF) return emitCache();
+    if (now - lastFail > FAILTIME_MAX_AGE) {
+      try {
+        unlinkSync(failFile);
+        logEvent("failtime-expired");
+      } catch {
+        /* ignore */
+      }
+    } else if (now - lastFail < BACKOFF) {
+      return emitCache();
+    }
   }
 
   if (cacheIsFresh()) return readFileSync(cacheFile, "utf8");
 
-  // Simple lock
-  if (existsSync(lockFile) && now - fileMtime(lockFile) < 30)
-    return emitCache();
+  // Lock: another process is fetching. If lock is older than LOCK_MAX_AGE,
+  // treat as orphan (likely SIGKILL'd before its finally{}) and remove.
+  if (existsSync(lockFile)) {
+    if (now - fileMtime(lockFile) < LOCK_MAX_AGE) return emitCache();
+    try {
+      unlinkSync(lockFile);
+      logEvent("lock-orphan-removed");
+    } catch {
+      /* ignore */
+    }
+  }
   try {
     writeFileSync(lockFile, String(process.pid));
   } catch {
@@ -174,6 +220,20 @@ export async function fetchUsage(): Promise<string | null> {
       /* ok */
     }
   }
+}
+
+export interface UsageHealth {
+  apiFailed: boolean;
+  failAgeSecs: number | null;
+}
+
+export function getUsageHealth(): UsageHealth {
+  const failFile = join(CACHE_DIR, "usage-fetch.failtime");
+  if (!existsSync(failFile)) return { apiFailed: false, failAgeSecs: null };
+  const lastFail = parseInt(readFileSafe(failFile) || "0", 10);
+  if (!lastFail) return { apiFailed: false, failAgeSecs: null };
+  const ageSecs = Math.floor(Date.now() / 1000) - lastFail;
+  return { apiFailed: true, failAgeSecs: ageSecs };
 }
 
 // Run standalone (for background refresh spawned by data.ts)

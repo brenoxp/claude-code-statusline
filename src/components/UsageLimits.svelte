@@ -7,9 +7,10 @@
 </script>
 
 {#if session}
-  {@const [sr, sg, sb] = rateRgb(session.pct)}
+  {@const sessionDim = session.stale || session.apiFailed}
+  {@const [sr, sg, sb] = sessionDim ? theme.slate : rateRgb(session.pct)}
   {@const pctFmt = String(session.pct).padStart(3) + "%"}
-  {@const pctColor = toRgb(rateRgb(session.pct))}
+  {@const pctColor = sessionDim ? toRgb(theme.slate) : toRgb(rateRgb(session.pct))}
   <Box flexDirection="row" gap={2}>
     <Box flexShrink={0} width={8}
       ><Text color={toRgb(theme.label)}>session</Text></Box
@@ -18,7 +19,7 @@
       ><ProgressBar pct={session.pct} width={10} color={[sr, sg, sb]} /></Box
     >
     <Box flexShrink={0}
-      ><Text color={pctColor} inverse={session.pct >= 90}>{pctFmt}</Text></Box
+      ><Text color={pctColor} inverse={!sessionDim && session.pct >= 90} dimColor={sessionDim}>{pctFmt}</Text></Box
     >
     {#if session.resetCountdown}
       <Box flexShrink={1}
@@ -44,9 +45,10 @@
 {/if}
 
 {#if weekly}
-  {@const [wr, wg, wb] = rateRgb(weekly.pct)}
+  {@const weeklyDim = weekly.stale || weekly.apiFailed}
+  {@const [wr, wg, wb] = weeklyDim ? theme.slate : rateRgb(weekly.pct)}
   {@const wPctFmt = String(weekly.pct).padStart(3) + "%"}
-  {@const wPctColor = toRgb(rateRgb(weekly.pct))}
+  {@const wPctColor = weeklyDim ? toRgb(theme.slate) : toRgb(rateRgb(weekly.pct))}
   <Box flexDirection="row" gap={2}>
     <Box flexShrink={0} width={8}
       ><Text color={toRgb(theme.label)}>weekly</Text></Box
@@ -55,7 +57,7 @@
       ><ProgressBar pct={weekly.pct} width={10} color={[wr, wg, wb]} /></Box
     >
     <Box flexShrink={0}
-      ><Text color={wPctColor} inverse={weekly.pct >= 90}>{wPctFmt}</Text></Box
+      ><Text color={wPctColor} inverse={!weeklyDim && weekly.pct >= 90} dimColor={weeklyDim}>{wPctFmt}</Text></Box
     >
     {#if weekly.resetCountdown}
       <Box flexShrink={1}

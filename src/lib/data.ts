@@ -16,7 +16,9 @@ import {
   fileMtime,
   writeFileSafe,
 } from "./theme";
-import { fetchUsage } from "./usage-fetch";
+import { fetchUsage, getUsageHealth } from "./usage-fetch";
+
+const USAGE_STALE_THRESHOLD_SECS = 5 * 60; // mark stale after 5 minutes
 
 const CACHE_DIR = join(homedir(), ".claude", "cache", "statusline");
 
@@ -48,8 +50,16 @@ export interface StatuslineProps {
     pct: number;
     resetCountdown: string;
     promoStatus: { active: boolean; time: string } | null;
+    stale: boolean;
+    apiFailed: boolean;
   } | null;
-  weekly: { pct: number; resetCountdown: string } | null;
+  weekly: {
+    pct: number;
+    resetCountdown: string;
+    stale: boolean;
+    apiFailed: boolean;
+  } | null;
+  usageStaleHint: string | null;
   // Processes
   cliCount: number;
   mcpCount: number;
@@ -195,15 +205,17 @@ async function getUsageData() {
     } catch {}
   }
 
-  if (!usageData) return { session: null, weekly: null };
+  if (!usageData)
+    return { session: null, weekly: null, usageStaleHint: null };
 
   let data: any;
   try {
     data = JSON.parse(usageData);
   } catch {
-    return { session: null, weekly: null };
+    return { session: null, weekly: null, usageStaleHint: null };
   }
-  if (!data.five_hour) return { session: null, weekly: null };
+  if (!data.five_hour)
+    return { session: null, weekly: null, usageStaleHint: null };
 
   const fivePct = Math.round(data.five_hour.utilization || 0);
   const fiveResetIso = data.five_hour.resets_at || "";
@@ -213,9 +225,40 @@ async function getUsageData() {
   const fiveReset = countdownFromIso(fiveResetIso, now);
   const sevenReset = countdownFromIso(sevenResetIso, now);
 
+  // Freshness: prefer the embedded fetched_at timestamp, fall back to file mtime
+  let ageSecs = now - fileMtime(cacheFile);
+  if (data.fetched_at) {
+    const fetchedEpoch = Math.floor(Date.parse(data.fetched_at) / 1000);
+    if (fetchedEpoch > 0) ageSecs = now - fetchedEpoch;
+  }
+  const stale = ageSecs > USAGE_STALE_THRESHOLD_SECS;
+
+  const health = getUsageHealth();
+  const apiFailed = health.apiFailed;
+
+  let usageStaleHint: string | null = null;
+  if (stale || apiFailed) {
+    const ageMin = Math.floor(ageSecs / 60);
+    const reason = apiFailed ? "api-fail" : `stale ${ageMin}m`;
+    // Keep hint concise; full instructions live in usage-fetch.ts header comment.
+    usageStaleHint = `usage ${reason} - rm ~/.claude/cache/statusline/usage-fetch.*`;
+  }
+
   return {
-    session: { pct: fivePct, resetCountdown: fiveReset, promoStatus: null },
-    weekly: { pct: sevenPct, resetCountdown: sevenReset },
+    session: {
+      pct: fivePct,
+      resetCountdown: fiveReset,
+      promoStatus: null,
+      stale,
+      apiFailed,
+    },
+    weekly: {
+      pct: sevenPct,
+      resetCountdown: sevenReset,
+      stale,
+      apiFailed,
+    },
+    usageStaleHint,
   };
 }
 

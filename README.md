@@ -1,6 +1,12 @@
 <h1 align="center">claude-code-statusline</h1>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@brenoxp/cc-statusline"><img src="https://img.shields.io/npm/v/@brenoxp/cc-statusline.svg?color=cb3837&label=npm" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/@brenoxp/cc-statusline"><img src="https://img.shields.io/npm/dm/@brenoxp/cc-statusline.svg?color=cb3837" alt="npm downloads" /></a>
+  <a href="https://github.com/brenoxp/claude-code-statusline/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/@brenoxp/cc-statusline.svg?color=blue" alt="license" /></a>
+</p>
+
+<p align="center">
   Custom status line for <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a> CLI, showing real-time session info in the terminal.
 </p>
 

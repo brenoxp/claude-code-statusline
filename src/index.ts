@@ -220,8 +220,8 @@ async function main() {
 if (process.argv.includes("--fetch-usage")) {
   // Let fetchUsage's promise complete; node/bun will exit after the event loop drains.
 } else
-main().catch((err) => {
-  if (debug)
-    process.stderr.write(`statusline error: ${err.stack || err.message}\n`);
-  process.exit(1);
-});
+  main().catch((err) => {
+    if (debug)
+      process.stderr.write(`statusline error: ${err.stack || err.message}\n`);
+    process.exit(1);
+  });

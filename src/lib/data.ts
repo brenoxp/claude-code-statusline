@@ -205,8 +205,7 @@ async function getUsageData() {
     } catch {}
   }
 
-  if (!usageData)
-    return { session: null, weekly: null, usageStaleHint: null };
+  if (!usageData) return { session: null, weekly: null, usageStaleHint: null };
 
   let data: any;
   try {
@@ -237,11 +236,10 @@ async function getUsageData() {
   const apiFailed = health.apiFailed;
 
   let usageStaleHint: string | null = null;
-  if (stale || apiFailed) {
-    const ageMin = Math.floor(ageSecs / 60);
-    const reason = apiFailed ? "api-fail" : `stale ${ageMin}m`;
-    // Keep hint concise; full instructions live in usage-fetch.ts header comment.
-    usageStaleHint = `usage ${reason} - rm ~/.claude/cache/statusline/usage-fetch.*`;
+  if (apiFailed) {
+    // Only warn on real fetch failures. Stale (>5min) is normal during idle —
+    // refresh is triggered the next time statusline renders (e.g. opening "/" menu).
+    usageStaleHint = `usage api-fail - rm ~/.claude/cache/statusline/usage-fetch.*`;
   }
 
   return {

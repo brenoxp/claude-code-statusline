@@ -58,9 +58,12 @@ const cacheWrite = settings.cacheWrite ?? false;
 const startTime = debug ? performance.now() : 0;
 
 function detectColumns(): number {
-  if (process.stdout.columns) return process.stdout.columns;
+  // Claude Code injects COLUMNS for status line scripts (CC >= the release that
+  // added COLUMNS/LINES env vars), so prefer it. Falls back to the legacy tty
+  // sniffing below for older CC or non-interactive invocations.
   const env = parseInt(process.env.COLUMNS as string, 10);
   if (env > 0) return env;
+  if (process.stdout.columns) return process.stdout.columns;
   try {
     let pid = process.ppid;
     for (let i = 0; i < 5; i++) {

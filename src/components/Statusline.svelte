@@ -6,6 +6,7 @@
   import Processes from "./Processes.svelte";
   import Tasks from "./Tasks.svelte";
   import Prompt from "./Prompt.svelte";
+  import { theme, toRgb } from "../lib/theme";
 
   let {
     path,
@@ -27,6 +28,7 @@
     maxWidth,
     minPromptLineWidth,
     maxPromptLineWidth,
+    latestVersion = null,
   } = $props();
 
   const now = new Date();
@@ -56,5 +58,10 @@
       {maxPromptLineWidth}
     />
   {/if}
-  <Text color="rgb(60,63,75)" dimColor>{timeStr}</Text>
+  <Box flexDirection="row" gap={2}>
+    <Text color={toRgb(theme.label)}>{timeStr}</Text>
+    {#if latestVersion}
+      <Text color={toRgb(theme.green)}>↑ v{latestVersion}</Text>
+    {/if}
+  </Box>
 </Box>

@@ -19,7 +19,7 @@ const ANSI_RE = /\x1b\[[0-9;]*[a-zA-Z]/g;
   },
 };
 
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -49,6 +49,8 @@ interface Settings {
 const CONFIG_DIR = join(homedir(), ".claude", ".statusline");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 const CONFIG_DOC = join(CONFIG_DIR, "CLAUDE.md");
+const UPDATE_CACHE_FILE = join(CONFIG_DIR, "update-check.json");
+const NPM_PKG = "@brenoxp/cc-statusline";
 
 const DEFAULT_CONFIG: Settings = {
   theme: "default",
@@ -120,32 +122,78 @@ function bootstrap(): void {
   }
 }
 
-bootstrap();
+// Read packaged defaults then merge user config on top. Called inside main()
+// so every render invocation gets a fresh read of config.json.
+function loadSettings(): Settings {
+  let settings: Settings = { ...DEFAULT_CONFIG };
+  try {
+    const packaged = JSON.parse(
+      readFileSync(join(__dirname, "..", "settings.json"), "utf8"),
+    );
+    settings = { ...settings, ...packaged };
+  } catch {}
+  try {
+    const userConfig = JSON.parse(readFileSync(CONFIG_FILE, "utf8"));
+    settings = { ...settings, ...userConfig };
+  } catch {}
+  return settings;
+}
 
-// Start from packaged defaults, merge user config over them.
-let settings: Settings = { ...DEFAULT_CONFIG };
-try {
-  const packaged = JSON.parse(
-    readFileSync(join(__dirname, "..", "settings.json"), "utf8"),
-  );
-  settings = { ...settings, ...packaged };
-} catch {}
-try {
-  const userConfig = JSON.parse(readFileSync(CONFIG_FILE, "utf8"));
-  settings = { ...settings, ...userConfig };
-} catch {}
+function getCurrentVersion(): string {
+  try {
+    return (
+      JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf8"))
+        .version ?? "0.0.0"
+    );
+  } catch {
+    return "0.0.0";
+  }
+}
 
-const debug = settings.debug || process.env.STATUSLINE_DEBUG === "true";
-const testMode = settings.testMode || process.env.TEST_MODE === "true";
-const logInput = settings.log || process.env.STATUSLINE_LOG === "true";
-const maxLineWidth = settings.maxLineWidth ?? null;
-const minPromptLineWidth = settings.minPromptLineWidth ?? null;
-const cacheWrite = settings.cacheWrite ?? false;
+function semverGt(a: string, b: string): boolean {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
+    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
+  }
+  return false;
+}
 
-// Swap the live palette to the configured theme + overrides before rendering.
-applyTheme(settings.theme ?? "default", settings.colors);
+// Fire-and-forget: query npm registry for the latest version and persist the
+// result to UPDATE_CACHE_FILE. Detached so it outlives the statusline process.
+function spawnVersionCheck(): void {
+  try {
+    const script = `v=$(npm view ${NPM_PKG} version 2>/dev/null); t=$(date +%s); [ -n "$v" ] && printf '{"lastCheck":%s,"latestVersion":"%s"}\\n' "$t" "$v" > "$1"`;
+    const child = spawn("sh", ["-c", script, "--", UPDATE_CACHE_FILE], {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
+  } catch {}
+}
 
-const startTime = debug ? performance.now() : 0;
+// Returns the latest version string when a newer release is available,
+// null otherwise. Triggers a background check at most once every 24 hours.
+function checkForUpdates(currentVersion: string): string | null {
+  try {
+    const cache = JSON.parse(readFileSync(UPDATE_CACHE_FILE, "utf8"));
+    const now = Math.floor(Date.now() / 1000);
+    if (now - (cache.lastCheck ?? 0) > 86400) spawnVersionCheck();
+    if (cache.latestVersion && semverGt(cache.latestVersion, currentVersion)) {
+      return cache.latestVersion as string;
+    }
+  } catch {
+    // No cache file yet — spawn the first check.
+    spawnVersionCheck();
+  }
+  return null;
+}
+
+// Module-level debug flag (env only) used by the .catch() handler below.
+// Inside main(), settings.debug is OR'd in for the full effectiveDebug.
+const debug = process.env.STATUSLINE_DEBUG === "true";
+const startTime = performance.now();
 
 function detectColumns(): number {
   // Claude Code injects COLUMNS for status line scripts (CC >= the release that
@@ -185,6 +233,24 @@ async function readStdin(): Promise<string> {
 }
 
 async function main() {
+  // bootstrap() and loadSettings() are called inside main() (not at module
+  // level) so config.json is re-read on every render invocation. CC spawns a
+  // fresh process per render, so theme changes in one session are picked up by
+  // all other sessions on their next render.
+  bootstrap();
+  const settings = loadSettings();
+  applyTheme(settings.theme ?? "default", settings.colors);
+
+  const effectiveDebug = settings.debug || debug;
+  const testMode = settings.testMode || process.env.TEST_MODE === "true";
+  const logInput = settings.log || process.env.STATUSLINE_LOG === "true";
+  const maxLineWidth = settings.maxLineWidth ?? null;
+  const minPromptLineWidth = settings.minPromptLineWidth ?? null;
+  const cacheWrite = settings.cacheWrite ?? false;
+
+  const currentVersion = getCurrentVersion();
+  const latestVersion = checkForUpdates(currentVersion);
+
   let raw: string;
   if (testMode) {
     const testFile = join(
@@ -220,7 +286,7 @@ async function main() {
   let maxWidth = termWidth - statusLineWidthPadding;
   if (maxLineWidth != null) maxWidth = Math.min(maxWidth, maxLineWidth);
 
-  const t0 = debug ? performance.now() : 0;
+  const t0 = effectiveDebug ? performance.now() : 0;
   const data = await gatherData(input, { cacheWrite });
   // Calculate widest non-prompt line to cap prompt width
   const lineWidths: number[] = [];
@@ -273,14 +339,20 @@ async function main() {
   const maxPromptLineWidth =
     maxOtherLineWidth > 0 ? maxOtherLineWidth : maxWidth;
 
-  const props = { ...data, maxWidth, minPromptLineWidth, maxPromptLineWidth };
-  const t1 = debug ? performance.now() : 0;
+  const props = {
+    ...data,
+    maxWidth,
+    minPromptLineWidth,
+    maxPromptLineWidth,
+    latestVersion,
+  };
+  const t1 = effectiveDebug ? performance.now() : 0;
 
   const output = await renderToString(Statusline, props, {
     columns: maxWidth,
-    ...(debug && { debug: true }),
+    ...(effectiveDebug && { debug: true }),
   } as any);
-  const t2 = debug ? performance.now() : 0;
+  const t2 = effectiveDebug ? performance.now() : 0;
 
   const padded = output
     .split("\n")
@@ -290,7 +362,7 @@ async function main() {
     .join("\n");
   process.stdout.write(padded + "\n");
 
-  if (debug) {
+  if (effectiveDebug) {
     const total = ((performance.now() - startTime) / 1000).toFixed(3);
     const gather = (t1 - t0).toFixed(1);
     const render = (t2 - t1).toFixed(1);

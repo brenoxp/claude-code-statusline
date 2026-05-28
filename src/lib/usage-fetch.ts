@@ -97,12 +97,14 @@ function getOAuthToken(): string | null {
 function httpGet(
   url: string,
   headers: Record<string, string>,
-): Promise<string> {
+): Promise<{ status: number; body: string }> {
   return new Promise((resolve, reject) => {
     const req = https.get(url, { headers, timeout: 5000 }, (res) => {
       let body = "";
       res.on("data", (chunk: string) => (body += chunk));
-      res.on("end", () => resolve(body));
+      res.on("end", () =>
+        resolve({ status: res.statusCode || 0, body }),
+      );
     });
     req.on("error", reject);
     req.on("timeout", () => {
@@ -183,16 +185,32 @@ export async function fetchUsage(): Promise<string | null> {
     const token = getOAuthToken();
     if (!token) return emitCache();
 
-    const body = await httpGet("https://api.anthropic.com/api/oauth/usage", {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      "anthropic-beta": "oauth-2025-04-20",
-    });
+    const { status, body } = await httpGet(
+      "https://api.anthropic.com/api/oauth/usage",
+      {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "anthropic-beta": "oauth-2025-04-20",
+      },
+    );
 
-    const data = JSON.parse(body);
+    if (status !== 200) {
+      logEvent(`api-fail http=${status} body=${body.slice(0, 200).replace(/\s+/g, " ")}`);
+      writeFileSafe(failFile, String(now));
+      return emitCache();
+    }
+
+    let data: { five_hour?: unknown; seven_day?: unknown; fetched_at?: string };
+    try {
+      data = JSON.parse(body);
+    } catch (e) {
+      logEvent(`api-fail parse=${(e as Error).message} body=${body.slice(0, 200).replace(/\s+/g, " ")}`);
+      writeFileSafe(failFile, String(now));
+      return emitCache();
+    }
     if (!data.five_hour) {
-      logEvent("api-fail");
+      logEvent(`api-fail no-five_hour body=${body.slice(0, 200).replace(/\s+/g, " ")}`);
       writeFileSafe(failFile, String(now));
       return emitCache();
     }
@@ -209,8 +227,9 @@ export async function fetchUsage(): Promise<string | null> {
     }
     writeFileSync(cacheFile, enriched);
     return enriched;
-  } catch {
-    logEvent("api-fail");
+  } catch (e) {
+    const msg = (e as Error)?.message || String(e);
+    logEvent(`api-fail err=${msg}`);
     writeFileSafe(failFile, String(now));
     return emitCache();
   } finally {

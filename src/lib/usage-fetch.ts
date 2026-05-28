@@ -102,9 +102,7 @@ function httpGet(
     const req = https.get(url, { headers, timeout: 5000 }, (res) => {
       let body = "";
       res.on("data", (chunk: string) => (body += chunk));
-      res.on("end", () =>
-        resolve({ status: res.statusCode || 0, body }),
-      );
+      res.on("end", () => resolve({ status: res.statusCode || 0, body }));
     });
     req.on("error", reject);
     req.on("timeout", () => {
@@ -196,7 +194,9 @@ export async function fetchUsage(): Promise<string | null> {
     );
 
     if (status !== 200) {
-      logEvent(`api-fail http=${status} body=${body.slice(0, 200).replace(/\s+/g, " ")}`);
+      logEvent(
+        `api-fail http=${status} body=${body.slice(0, 200).replace(/\s+/g, " ")}`,
+      );
       writeFileSafe(failFile, String(now));
       return emitCache();
     }
@@ -205,12 +205,16 @@ export async function fetchUsage(): Promise<string | null> {
     try {
       data = JSON.parse(body);
     } catch (e) {
-      logEvent(`api-fail parse=${(e as Error).message} body=${body.slice(0, 200).replace(/\s+/g, " ")}`);
+      logEvent(
+        `api-fail parse=${(e as Error).message} body=${body.slice(0, 200).replace(/\s+/g, " ")}`,
+      );
       writeFileSafe(failFile, String(now));
       return emitCache();
     }
     if (!data.five_hour) {
-      logEvent(`api-fail no-five_hour body=${body.slice(0, 200).replace(/\s+/g, " ")}`);
+      logEvent(
+        `api-fail no-five_hour body=${body.slice(0, 200).replace(/\s+/g, " ")}`,
+      );
       writeFileSafe(failFile, String(now));
       return emitCache();
     }

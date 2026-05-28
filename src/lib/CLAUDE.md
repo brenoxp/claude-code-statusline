@@ -15,12 +15,18 @@ Gathers all statusline props from stdin JSON + system state. `gatherData()` is t
 Cache dir: `~/.claude/cache/statusline/` (git-data, processes-data, usage)
 
 ## theme.ts
-- `theme` object: RGB tuples for all semantic colors (green, yellow, orange, red, model, label, etc.)
+- `theme` object: MUTABLE RGB tuples for all semantic colors (green, yellow, orange, red, model, label, etc.). Components import this binding and read it at render time; `applyTheme` mutates in place (never reassign)
+- `applyTheme(name, overrides?)` - swaps the live palette to a preset from themes.ts (unknown name → default), then applies optional per-key `[r,g,b]` overrides (invalid ones skipped). Called from index.ts after config load, before render
 - `toRgb()` converts tuple to `rgb(r,g,b)` string for nib-ink
 - `thresholdRgb()` / `ctxRgb()` / `rateRgb()` - color scales based on percentage thresholds
 - `formatTokensCompact()` - 51832 → `51k`, 1234567 → `1.2m`
 - `countdownFromEpoch()` - epoch seconds → `2d 3h`, `1h 42m`, `23m`, `now`. `countdownFromIso()` wraps it for ISO strings
 - File helpers: `readFileSafe`, `writeFileSafe`, `fileMtime`
+
+## themes.ts
+- `themeNames` / `ThemeName` - the 5 selectable themes: default, tokyo-night, dracula, gruvbox, nord
+- `themes` - `Record<ThemeName, Record<key, RgbTuple>>`, each defining all 12 semantic keys. "default" is byte-identical to the original theme.ts palette
+- User config (`~/.claude/.statusline/config.json`, bootstrapped by index.ts) picks the theme + supplies color overrides, applied via `applyTheme`
 
 ## Rate limits
 Read from `input.rate_limits` (see `getUsageData` above), not fetched. The old `usage-fetch.ts` (OAuth → `api.anthropic.com/api/oauth/usage` with caching/locking/backoff) was removed once Claude Code began sending `rate_limits` in the stdin JSON.

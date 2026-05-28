@@ -43,7 +43,11 @@ Claude Code's TUI is built with Ink (React for terminals, uses Yoga layout). The
 - Width collision: if our lines + right-side indicators > available width, Yoga squeezes both. Use `maxLineWidth` in settings.json to prevent
 
 ## Settings
-`settings.json` - runtime config (falls back to env vars):
+User config lives at `~/.claude/.statusline/config.json` (bootstrapped on first run alongside a pre-computed `CLAUDE.md`). Precedence: packaged `settings.json` defaults < user config < env vars. Same fields as below plus:
+- `theme` ("default") - one of: default, tokyo-night, dracula, gruvbox, nord (see `src/lib/themes.ts`)
+- `colors` ({}) - per-key RGB overrides on top of theme, e.g. `{ "green": [70,195,115] }`. 12 keys: green, yellow, orange, red, model, label, slate, purple, muted, prompt, barDim, barLerp
+
+Packaged `settings.json` (dev/legacy fallback, runtime config, env overrides):
 - `maxLineWidth` (70) - cap line width
 - `cacheWrite` (true) - show cache_creation_input_tokens (✎ indicator)
 - `minPromptLineWidth` (40) - minimum prompt line width

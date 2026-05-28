@@ -1,7 +1,16 @@
 #!/bin/sh
 # Picks bun if on PATH (correct unicode width), else falls back to node.
-# Uses parameter expansion (no external commands) so it works in minimal PATH.
+# Resolve symlinks first: on a global npm install $0 is a symlink in the node
+# bin dir, so naive "${0%/*}/../dist" points at the wrong tree. Walk the link
+# chain to the real file before computing the package dir.
 SCRIPT="$0"
+while [ -L "$SCRIPT" ]; do
+  LINK=$(readlink "$SCRIPT")
+  case "$LINK" in
+    /*) SCRIPT="$LINK" ;;
+    *)  SCRIPT="${SCRIPT%/*}/$LINK" ;;
+  esac
+done
 case "$SCRIPT" in
   */*) SCRIPT_DIR="${SCRIPT%/*}" ;;
   *)   SCRIPT_DIR="." ;;

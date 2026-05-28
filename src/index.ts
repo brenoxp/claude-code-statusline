@@ -20,20 +20,24 @@ const ANSI_RE = /\x1b\[[0-9;]*[a-zA-Z]/g;
 };
 
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { homedir } from "node:os";
 import { renderToString, setTheme } from "nib-ink";
 import Statusline from "./components/Statusline.svelte";
 import { gatherData } from "./lib/data";
-import { formatTokensCompact } from "./lib/theme";
+import { formatTokensCompact, applyTheme } from "./lib/theme";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 setTheme("light");
 
-// Load settings.json from project root (one level up from dist/)
+// User config lives in ~/.claude/.statusline/. The packaged settings.json
+// (one level up from dist/) is the dev/legacy default; user config wins.
 interface Settings {
+  theme?: string;
+  colors?: Record<string, [number, number, number]>;
   debug?: boolean;
   testMode?: boolean;
   log?: boolean;
@@ -41,11 +45,94 @@ interface Settings {
   minPromptLineWidth?: number;
   cacheWrite?: boolean;
 }
-let settings: Settings = {};
+
+const CONFIG_DIR = join(homedir(), ".claude", ".statusline");
+const CONFIG_FILE = join(CONFIG_DIR, "config.json");
+const CONFIG_DOC = join(CONFIG_DIR, "CLAUDE.md");
+
+const DEFAULT_CONFIG: Settings = {
+  theme: "default",
+  colors: {},
+  maxLineWidth: 70,
+  minPromptLineWidth: 40,
+  cacheWrite: true,
+  debug: false,
+  testMode: false,
+  log: false,
+};
+
+const CONFIG_DOC_CONTENT = `# cc-statusline user config
+
+This folder holds the user config for the cc-statusline binary (Claude Code custom statusline). Edit \`config.json\` to customize colors and behavior. Changes take effect on the next render; no rebuild needed for an installed binary.
+
+## config.json fields
+- \`theme\` — one of the 5 theme names below.
+- \`colors\` — optional per-key RGB overrides applied on top of the theme, e.g. \`{ "green": [70,195,115] }\`. Each value is an \`[r,g,b]\` array (0-255).
+- \`maxLineWidth\` (70) — cap on rendered line width.
+- \`minPromptLineWidth\` (40) — minimum width reserved for the prompt line.
+- \`cacheWrite\` (true) — show cache-creation tokens (the ✎ indicator).
+- \`debug\` (false) — write timing info to stderr.
+- \`testMode\` (false) — render from the packaged examples instead of stdin.
+- \`log\` (false) — save each stdin JSON payload to a logs/ dir.
+
+## Themes
+- \`default\`
+- \`tokyo-night\`
+- \`dracula\`
+- \`gruvbox\`
+- \`nord\`
+
+To change theme, set the \`theme\` field. To tweak individual colors, add entries to the \`colors\` map (overrides win over the theme).
+
+## Color keys (12)
+- \`green\` — success / path
+- \`yellow\` — warn threshold (low)
+- \`orange\` — warn threshold (high)
+- \`red\` — critical threshold
+- \`model\` — model-name accent
+- \`label\` — dim labels
+- \`slate\` — muted secondary text
+- \`purple\` — accent
+- \`muted\` — general text
+- \`prompt\` — prompt text
+- \`barDim\` — progress bar base color
+- \`barLerp\` — progress bar bright target color
+
+The \`/statusline:config\` skill can reconfigure this interactively.
+`;
+
+// Ensure the user config folder exists and seed config.json + CLAUDE.md on
+// first run. Never throws: the statusline must render even if the FS is hostile.
+function bootstrap(): void {
+  try {
+    mkdirSync(CONFIG_DIR, { recursive: true });
+    if (!existsSync(CONFIG_FILE)) {
+      writeFileSync(
+        CONFIG_FILE,
+        JSON.stringify(DEFAULT_CONFIG, null, 2) + "\n",
+      );
+    }
+    if (!existsSync(CONFIG_DOC)) {
+      writeFileSync(CONFIG_DOC, CONFIG_DOC_CONTENT);
+    }
+  } catch {
+    /* ignore — fall back to defaults */
+  }
+}
+
+bootstrap();
+
+// Start from packaged defaults, merge user config over them.
+let settings: Settings = { ...DEFAULT_CONFIG };
 try {
-  settings = JSON.parse(
+  const packaged = JSON.parse(
     readFileSync(join(__dirname, "..", "settings.json"), "utf8"),
   );
+  settings = { ...settings, ...packaged };
+} catch {}
+try {
+  const userConfig = JSON.parse(readFileSync(CONFIG_FILE, "utf8"));
+  settings = { ...settings, ...userConfig };
 } catch {}
 
 const debug = settings.debug || process.env.STATUSLINE_DEBUG === "true";
@@ -54,6 +141,9 @@ const logInput = settings.log || process.env.STATUSLINE_LOG === "true";
 const maxLineWidth = settings.maxLineWidth ?? null;
 const minPromptLineWidth = settings.minPromptLineWidth ?? null;
 const cacheWrite = settings.cacheWrite ?? false;
+
+// Swap the live palette to the configured theme + overrides before rendering.
+applyTheme(settings.theme ?? "default", settings.colors);
 
 const startTime = debug ? performance.now() : 0;
 

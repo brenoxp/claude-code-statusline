@@ -1,9 +1,13 @@
 import { readFileSync, statSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { themes, type ThemeName } from "./themes";
 
 // Theme colors as RGB tuples
 export type RgbTuple = [number, number, number];
 
+// Mutable palette. Initialized to the "default" theme. Components import this
+// binding and read it at render time, so applyTheme() can swap colors in place
+// without breaking existing imports (never reassign the binding).
 export const theme = {
   green: [70, 195, 115] as RgbTuple,
   yellow: [230, 180, 50] as RgbTuple,
@@ -18,6 +22,35 @@ export const theme = {
   barDim: [195, 195, 210] as RgbTuple,
   barLerp: [255, 255, 255] as RgbTuple,
 };
+
+// Swap the live palette to a named preset, then apply optional per-key RGB
+// overrides on top. Mutates `theme` in place so existing imports see new values.
+// Unknown theme name falls back to "default". Invalid overrides are skipped.
+export function applyTheme(
+  name: ThemeName | string,
+  overrides?: Record<string, [number, number, number]>,
+): void {
+  const preset = themes[name as ThemeName] ?? themes.default;
+  for (const key of Object.keys(theme) as (keyof typeof theme)[]) {
+    if (preset[key]) theme[key] = preset[key] as RgbTuple;
+  }
+  if (overrides) {
+    for (const [key, val] of Object.entries(overrides)) {
+      if (
+        key in theme &&
+        Array.isArray(val) &&
+        val.length === 3 &&
+        val.every((n) => typeof n === "number")
+      ) {
+        (theme as Record<string, RgbTuple>)[key] = [
+          val[0],
+          val[1],
+          val[2],
+        ] as RgbTuple;
+      }
+    }
+  }
+}
 
 // Convert RGB tuple to "rgb(r,g,b)" string for nib-ink's <Text color={...}> prop
 export function toRgb(c: RgbTuple): string {

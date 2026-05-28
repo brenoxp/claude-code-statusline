@@ -3,6 +3,13 @@ import { compile } from "svelte/compiler";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 
+// Bake the package version into the bundle so update detection works regardless
+// of layout (npm dist/ sibling package.json vs the self-contained plugin bundle
+// which ships no package.json next to it).
+const packageVersion = JSON.parse(
+  readFileSync(resolve("package.json"), "utf8"),
+).version;
+
 // Force all svelte imports to resolve from our node_modules, using client entry
 const svelteDedup: Plugin = {
   name: "svelte-dedup",
@@ -50,6 +57,7 @@ await build({
   banner: { js: "#!/usr/bin/env node" },
   target: "esnext",
   minify: true,
+  define: { __STATUSLINE_VERSION__: JSON.stringify(packageVersion) },
   conditions: ["browser"],
   plugins: [svelteDedup, sveltePlugin],
   external: [],

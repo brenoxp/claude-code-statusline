@@ -28,7 +28,11 @@ import { renderToString, setTheme } from "nib-ink";
 import Statusline from "./components/Statusline.svelte";
 import { gatherData } from "./lib/data";
 import { formatTokensCompact, applyTheme } from "./lib/theme";
-import { getCurrentVersion, checkForUpdates } from "./lib/update-check";
+import { checkForUpdates } from "./lib/update-check";
+
+// Baked in at build time via esbuild `define` (see build.ts). Avoids a runtime
+// package.json read that breaks in the self-contained plugin bundle layout.
+declare const __STATUSLINE_VERSION__: string;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -197,10 +201,10 @@ async function main() {
   const minPromptLineWidth = settings.minPromptLineWidth ?? null;
   const cacheWrite = settings.cacheWrite ?? false;
 
-  const currentVersion = getCurrentVersion(
-    join(__dirname, "..", "package.json"),
+  const latestVersion = checkForUpdates(
+    __STATUSLINE_VERSION__,
+    UPDATE_CACHE_FILE,
   );
-  const latestVersion = checkForUpdates(currentVersion, UPDATE_CACHE_FILE);
 
   let raw: string;
   if (testMode) {

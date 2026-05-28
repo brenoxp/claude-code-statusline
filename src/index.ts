@@ -19,7 +19,7 @@ const ANSI_RE = /\x1b\[[0-9;]*[a-zA-Z]/g;
   },
 };
 
-import { execSync, spawn } from "node:child_process";
+import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -28,6 +28,7 @@ import { renderToString, setTheme } from "nib-ink";
 import Statusline from "./components/Statusline.svelte";
 import { gatherData } from "./lib/data";
 import { formatTokensCompact, applyTheme } from "./lib/theme";
+import { getCurrentVersion, checkForUpdates } from "./lib/update-check";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -50,7 +51,6 @@ const CONFIG_DIR = join(homedir(), ".claude", ".statusline");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 const CONFIG_DOC = join(CONFIG_DIR, "CLAUDE.md");
 const UPDATE_CACHE_FILE = join(CONFIG_DIR, "update-check.json");
-const NPM_PKG = "@brenoxp/cc-statusline";
 
 const DEFAULT_CONFIG: Settings = {
   theme: "default",
@@ -139,57 +139,6 @@ function loadSettings(): Settings {
   return settings;
 }
 
-function getCurrentVersion(): string {
-  try {
-    return (
-      JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf8"))
-        .version ?? "0.0.0"
-    );
-  } catch {
-    return "0.0.0";
-  }
-}
-
-function semverGt(a: string, b: string): boolean {
-  const pa = a.split(".").map(Number);
-  const pb = b.split(".").map(Number);
-  for (let i = 0; i < 3; i++) {
-    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
-    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
-  }
-  return false;
-}
-
-// Fire-and-forget: query npm registry for the latest version and persist the
-// result to UPDATE_CACHE_FILE. Detached so it outlives the statusline process.
-function spawnVersionCheck(): void {
-  try {
-    const script = `v=$(npm view ${NPM_PKG} version 2>/dev/null); t=$(date +%s); [ -n "$v" ] && printf '{"lastCheck":%s,"latestVersion":"%s"}\\n' "$t" "$v" > "$1"`;
-    const child = spawn("sh", ["-c", script, "--", UPDATE_CACHE_FILE], {
-      detached: true,
-      stdio: "ignore",
-    });
-    child.unref();
-  } catch {}
-}
-
-// Returns the latest version string when a newer release is available,
-// null otherwise. Triggers a background check at most once every 24 hours.
-function checkForUpdates(currentVersion: string): string | null {
-  try {
-    const cache = JSON.parse(readFileSync(UPDATE_CACHE_FILE, "utf8"));
-    const now = Math.floor(Date.now() / 1000);
-    if (now - (cache.lastCheck ?? 0) > 86400) spawnVersionCheck();
-    if (cache.latestVersion && semverGt(cache.latestVersion, currentVersion)) {
-      return cache.latestVersion as string;
-    }
-  } catch {
-    // No cache file yet — spawn the first check.
-    spawnVersionCheck();
-  }
-  return null;
-}
-
 // Module-level debug flag (env only) used by the .catch() handler below.
 // Inside main(), settings.debug is OR'd in for the full effectiveDebug.
 const debug = process.env.STATUSLINE_DEBUG === "true";
@@ -248,8 +197,10 @@ async function main() {
   const minPromptLineWidth = settings.minPromptLineWidth ?? null;
   const cacheWrite = settings.cacheWrite ?? false;
 
-  const currentVersion = getCurrentVersion();
-  const latestVersion = checkForUpdates(currentVersion);
+  const currentVersion = getCurrentVersion(
+    join(__dirname, "..", "package.json"),
+  );
+  const latestVersion = checkForUpdates(currentVersion, UPDATE_CACHE_FILE);
 
   let raw: string;
   if (testMode) {

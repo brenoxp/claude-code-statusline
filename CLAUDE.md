@@ -14,7 +14,7 @@ Custom statusline for Claude Code CLI. Built with nib-ink (Svelte 5), renders AN
 ## Build
 ```bash
 bun run build    # → dist/index.js (single bundle, zero runtime deps)
-bun run test     # 9 tests: build, truncation, integration, sanitization
+bun run test     # build, truncation, integration, sanitization + bun unit tests (update-check)
 ```
 
 ## Key design decisions

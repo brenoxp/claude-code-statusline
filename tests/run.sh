@@ -102,6 +102,15 @@ LEAKS=$(grep -rE "/Users/$LOCAL_USER(/|\$|[^a-zA-Z0-9_-])" "$PROJECT_DIR" \
     2>/dev/null | grep -v 'CLAUDE.md' || true)
 assert_eq "no personal paths leaked" "" "$LEAKS"
 
+# ── Unit tests (bun test) ────────────────────────────────
+echo "unit (update-check)"
+if bun test "$SCRIPT_DIR/update-check.test.ts" >/tmp/statusline-bun-test.log 2>&1; then
+    UNIT_COUNT=$(grep -oE '[0-9]+ pass' /tmp/statusline-bun-test.log | grep -oE '[0-9]+' || echo "?")
+    pass "bun unit tests ($UNIT_COUNT pass)"
+else
+    fail "bun unit tests" "$(grep -E '[0-9]+ fail' /tmp/statusline-bun-test.log || echo 'see /tmp/statusline-bun-test.log')"
+fi
+
 # ── Summary ──────────────────────────────────────────────
 echo ""
 TOTAL=$((PASS + FAIL))

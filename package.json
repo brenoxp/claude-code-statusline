@@ -1,6 +1,6 @@
 {
   "name": "@brenoxp/cc-statusline",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Custom status line for Claude Code CLI",
   "type": "module",
   "main": "dist/index.js",

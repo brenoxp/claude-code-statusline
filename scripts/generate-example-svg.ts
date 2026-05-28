@@ -31,6 +31,14 @@ const mockInput = JSON.stringify({
       cache_read_input_tokens: 45800,
     },
   },
+  // Explicit rate_limits so the SVG is self-contained and deterministic. Without
+  // these, getUsageData falls back to the local cache and would leak the
+  // generating machine's real usage into the committed image. Mirrors the
+  // examples/input_with_context.json fixture (epochs picked for nice countdowns).
+  rate_limits: {
+    five_hour: { used_percentage: 23.5, resets_at: 1780005495 },
+    seven_day: { used_percentage: 41.2, resets_at: 1780440375 },
+  },
 });
 
 const ansiOutput = execSync(

@@ -1,1 +1,57 @@
-{"session_id":"c9bf9e57-1685-4c89-bafb-ff5af830be8a","transcript_path":"~/.claude/projects/myapp/c9bf9e57-1685-4c89-bafb-ff5af830be8a.jsonl","cwd":"~/projects/myapp","model":{"id":"claude-opus-4-5-20251101","display_name":"Opus 4.5"},"workspace":{"current_dir":"~/projects/myapp","project_dir":"~/projects/myapp"},"version":"2.1.22","output_style":{"name":"default"},"cost":{"total_cost_usd":0.98,"total_duration_ms":191020,"total_api_duration_ms":203677,"total_lines_added":2,"total_lines_removed":2},"context_window":{"total_input_tokens":42216,"total_output_tokens":9551,"context_window_size":200000,"current_usage":{"input_tokens":1,"output_tokens":1,"cache_creation_input_tokens":323,"cache_read_input_tokens":42130},"used_percentage":21,"remaining_percentage":79},"exceeds_200k_tokens":false}
+{
+  "session_id": "c9bf9e57-1685-4c89-bafb-ff5af830be8a",
+  "session_name": "statusline-refactor",
+  "transcript_path": "~/.claude/projects/myapp/c9bf9e57-1685-4c89-bafb-ff5af830be8a.jsonl",
+  "cwd": "~/projects/myapp",
+  "model": { "id": "claude-opus-4-8", "display_name": "Opus 4.8" },
+  "workspace": {
+    "current_dir": "~/projects/myapp",
+    "project_dir": "~/projects/myapp",
+    "added_dirs": [],
+    "git_worktree": "feature-xyz",
+    "repo": { "host": "github.com", "owner": "brenoxp", "name": "claude-code-statusline" }
+  },
+  "version": "2.1.132",
+  "output_style": { "name": "default" },
+  "cost": {
+    "total_cost_usd": 0.98,
+    "total_duration_ms": 191020,
+    "total_api_duration_ms": 203677,
+    "total_lines_added": 2,
+    "total_lines_removed": 2
+  },
+  "context_window": {
+    "total_input_tokens": 55630,
+    "total_output_tokens": 9551,
+    "context_window_size": 200000,
+    "used_percentage": 28,
+    "remaining_percentage": 72,
+    "current_usage": {
+      "input_tokens": 8500,
+      "output_tokens": 1200,
+      "cache_creation_input_tokens": 5000,
+      "cache_read_input_tokens": 42130
+    }
+  },
+  "exceeds_200k_tokens": false,
+  "effort": { "level": "high" },
+  "thinking": { "enabled": true },
+  "rate_limits": {
+    "five_hour": { "used_percentage": 23.5, "resets_at": 1738425600 },
+    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }
+  },
+  "vim": { "mode": "NORMAL" },
+  "agent": { "name": "security-reviewer" },
+  "pr": {
+    "number": 1234,
+    "url": "https://github.com/brenoxp/claude-code-statusline/pull/1234",
+    "review_state": "pending"
+  },
+  "worktree": {
+    "name": "my-feature",
+    "path": "~/projects/myapp/.claude/worktrees/my-feature",
+    "branch": "worktree-my-feature",
+    "original_cwd": "~/projects/myapp",
+    "original_branch": "master"
+  }
+}

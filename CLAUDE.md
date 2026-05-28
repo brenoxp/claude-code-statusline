@@ -53,3 +53,5 @@ Claude Code's TUI is built with Ink (React for terminals, uses Yoga layout). The
 
 ## Repo
 - GitHub: github.com/brenoxp/claude-code-statusline
+
+@docs/index.md

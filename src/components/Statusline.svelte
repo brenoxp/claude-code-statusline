@@ -59,7 +59,7 @@
     />
   {/if}
   <Box flexDirection="row" gap={2}>
-    <Text color={toRgb(theme.label)}>{timeStr}</Text>
+    <Text color={toRgb(theme.slate)}>{timeStr}</Text>
     {#if latestVersion}
       <Text color={toRgb(theme.green)}>↑ v{latestVersion}</Text>
     {/if}

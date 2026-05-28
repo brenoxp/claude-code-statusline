@@ -7,3 +7,4 @@ logs/
 bun.lock
 dist/
 .claude/settings.local.json
+.claude/commands/

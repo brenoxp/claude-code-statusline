@@ -10,8 +10,7 @@
     ><Text color={toRgb(theme.purple)} bold>◆ {cliCount} cli</Text></Box
   >
   <Box flexShrink={1}
-    ><Text wrap="truncate" color={toRgb(theme.slate)} dimColor
-      >◇ {mcpCount} mcp</Text
+    ><Text wrap="truncate" color={toRgb(theme.slate)}>◇ {mcpCount} mcp</Text
     ></Box
   >
 </Box>

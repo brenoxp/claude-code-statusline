@@ -154,17 +154,11 @@ async function main() {
   if (data.cacheWriteTokens > 0)
     ctxWidth += 2 + 1 + formatTokensCompact(data.cacheWriteTokens).length;
   lineWidths.push(ctxWidth);
-  // Session/Weekly: label(8) + gap(2) + bar(21) + gap(2) + pct(4) + gap(2) + countdown + gap(2) + promo
+  // Session/Weekly: label(8) + gap(2) + bar(21) + gap(2) + pct(4) + gap(2) + countdown
   if (data.session) {
     let sw = 8 + 2 + 21 + 2 + 4;
     if (data.session.resetCountdown)
       sw += 2 + data.session.resetCountdown.length;
-    if (data.session.promoStatus)
-      sw +=
-        2 +
-        (data.session.promoStatus.active
-          ? `⚡2x ${data.session.promoStatus.time} left`.length + 1
-          : `⚡2x in ${data.session.promoStatus.time}`.length + 1);
     lineWidths.push(sw);
   }
   if (data.weekly) {
@@ -172,7 +166,6 @@ async function main() {
     if (data.weekly.resetCountdown) ww += 2 + data.weekly.resetCountdown.length;
     lineWidths.push(ww);
   }
-  if (data.usageStaleHint) lineWidths.push(data.usageStaleHint.length);
   // Processes: "◆ X cli" + gap(2) + "◇ X mcp"
   lineWidths.push(
     `◆ ${data.cliCount} cli`.length + 1 + 2 + `◇ ${data.mcpCount} mcp`.length,
@@ -214,14 +207,8 @@ async function main() {
   }
 }
 
-// When invoked with --fetch-usage we're a background usage refresher spawned by
-// data.ts. usage-fetch.ts's module init already ran fetchUsage(); skip main()
-// so it doesn't try to read stdin and crash, killing the in-flight fetch.
-if (process.argv.includes("--fetch-usage")) {
-  // Let fetchUsage's promise complete; node/bun will exit after the event loop drains.
-} else
-  main().catch((err) => {
-    if (debug)
-      process.stderr.write(`statusline error: ${err.stack || err.message}\n`);
-    process.exit(1);
-  });
+main().catch((err) => {
+  if (debug)
+    process.stderr.write(`statusline error: ${err.stack || err.message}\n`);
+  process.exit(1);
+});

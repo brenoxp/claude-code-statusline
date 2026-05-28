@@ -37,8 +37,8 @@
   "effort": { "level": "high" },
   "thinking": { "enabled": true },
   "rate_limits": {
-    "five_hour": { "used_percentage": 23.5, "resets_at": 1738425600 },
-    "seven_day": { "used_percentage": 41.2, "resets_at": 1738857600 }
+    "five_hour": { "used_percentage": 23.5, "resets_at": 1780005495 },
+    "seven_day": { "used_percentage": 41.2, "resets_at": 1780440375 }
   },
   "vim": { "mode": "NORMAL" },
   "agent": { "name": "security-reviewer" },

@@ -5,7 +5,7 @@ Custom statusline for Claude Code CLI. Built with nib-ink (Svelte 5), renders AN
 ## Structure
 - `src/index.ts` - entry point (stdin → renderToString → stdout)
 - `src/components/` - Svelte 5 components
-- `src/lib/` - data gathering, theme, usage-fetch
+- `src/lib/` - data gathering, theme
 - `build.ts` - esbuild config
 - `settings.json` - runtime config
 - `examples/` - sample inputs + SVG
@@ -18,7 +18,7 @@ bun run test     # 9 tests: build, truncation, integration, sanitization
 ```
 
 ## Key design decisions
-- macOS only (`security` for keychain)
+- macOS only (BSD `ps`/`pgrep`/`stty` flags for process detection + terminal sizing)
 - Terminal width: `process.stdout.columns` > `COLUMNS` env > walk parent PIDs for tty > 80
 - Panel padding: < 80 cols = 4, >= 80 cols = 5. Lines space-padded to full termWidth
 - esbuild resolves svelte to `index-client.js` via `conditions: ["browser"]` + svelteDedup plugin. No `--conditions=browser` needed at runtime

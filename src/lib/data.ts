@@ -1,4 +1,4 @@
-import { exec, spawn } from "node:child_process";
+import { exec } from "node:child_process";
 import {
   existsSync,
   readFileSync,
@@ -9,16 +9,12 @@ import {
 } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
-  countdownFromIso,
+  countdownFromEpoch,
   readFileSafe,
   fileMtime,
   writeFileSafe,
 } from "./theme";
-import { fetchUsage, getUsageHealth } from "./usage-fetch";
-
-const USAGE_STALE_THRESHOLD_SECS = 5 * 60; // mark stale after 5 minutes
 
 const CACHE_DIR = join(homedir(), ".claude", "cache", "statusline");
 
@@ -45,21 +41,15 @@ export interface StatuslineProps {
   contextPct: number;
   tokenCount: number;
   cacheWriteTokens: number;
-  // Usage limits
+  // Usage limits (from input.rate_limits)
   session: {
     pct: number;
     resetCountdown: string;
-    promoStatus: { active: boolean; time: string } | null;
-    stale: boolean;
-    apiFailed: boolean;
   } | null;
   weekly: {
     pct: number;
     resetCountdown: string;
-    stale: boolean;
-    apiFailed: boolean;
   } | null;
-  usageStaleHint: string | null;
   // Processes
   cliCount: number;
   mcpCount: number;
@@ -183,80 +173,26 @@ function getContextData(input: any, cacheWrite: boolean) {
   return { modelName, contextPct, tokenCount: totalUsed, cacheWriteTokens };
 }
 
-async function getUsageData() {
-  const cacheFile = join(CACHE_DIR, "usage.json");
+// Rate limits come straight from the stdin JSON (input.rate_limits), which Claude
+// Code populates for Pro/Max subscribers after the first API response. Each window
+// (five_hour / seven_day) may be independently absent. resets_at is epoch seconds.
+function getUsageData(input: any) {
+  const rateLimits = input.rate_limits;
+  if (!rateLimits) return { session: null, weekly: null };
+
   const now = Math.floor(Date.now() / 1000);
 
-  let usageData = readFileSafe(cacheFile);
-
-  if (usageData) {
-    const lockFile = join(CACHE_DIR, "usage-fetch.lock");
-    const lockExists = existsSync(lockFile) && now - fileMtime(lockFile) < 30;
-    if (now - fileMtime(cacheFile) >= 60 && !lockExists) {
-      const bundlePath = fileURLToPath(import.meta.url);
-      spawn(process.execPath, [bundlePath, "--fetch-usage"], {
-        stdio: "ignore",
-        detached: true,
-      }).unref();
-    }
-  } else {
-    try {
-      usageData = await fetchUsage();
-    } catch {}
-  }
-
-  if (!usageData) return { session: null, weekly: null, usageStaleHint: null };
-
-  let data: any;
-  try {
-    data = JSON.parse(usageData);
-  } catch {
-    return { session: null, weekly: null, usageStaleHint: null };
-  }
-  if (!data.five_hour)
-    return { session: null, weekly: null, usageStaleHint: null };
-
-  const fivePct = Math.round(data.five_hour.utilization || 0);
-  const fiveResetIso = data.five_hour.resets_at || "";
-  const sevenPct = Math.round(data.seven_day?.utilization || 0);
-  const sevenResetIso = data.seven_day?.resets_at || "";
-
-  const fiveReset = countdownFromIso(fiveResetIso, now);
-  const sevenReset = countdownFromIso(sevenResetIso, now);
-
-  // Freshness: prefer the embedded fetched_at timestamp, fall back to file mtime
-  let ageSecs = now - fileMtime(cacheFile);
-  if (data.fetched_at) {
-    const fetchedEpoch = Math.floor(Date.parse(data.fetched_at) / 1000);
-    if (fetchedEpoch > 0) ageSecs = now - fetchedEpoch;
-  }
-  const stale = ageSecs > USAGE_STALE_THRESHOLD_SECS;
-
-  const health = getUsageHealth();
-  const apiFailed = health.apiFailed;
-
-  let usageStaleHint: string | null = null;
-  if (apiFailed) {
-    // Only warn on real fetch failures. Stale (>5min) is normal during idle —
-    // refresh is triggered the next time statusline renders (e.g. opening "/" menu).
-    usageStaleHint = `usage api-fail - rm ~/.claude/cache/statusline/usage-fetch.*`;
-  }
+  const window = (w: any) =>
+    w
+      ? {
+          pct: Math.round(w.used_percentage || 0),
+          resetCountdown: countdownFromEpoch(w.resets_at || 0, now),
+        }
+      : null;
 
   return {
-    session: {
-      pct: fivePct,
-      resetCountdown: fiveReset,
-      promoStatus: null,
-      stale,
-      apiFailed,
-    },
-    weekly: {
-      pct: sevenPct,
-      resetCountdown: sevenReset,
-      stale,
-      apiFailed,
-    },
-    usageStaleHint,
+    session: window(rateLimits.five_hour),
+    weekly: window(rateLimits.seven_day),
   };
 }
 
@@ -428,11 +364,11 @@ export async function gatherData(
   const context = getContextData(input, opts.cacheWrite ?? false);
   const tasks = getTasksData(input);
   const prompt = getPromptData(input);
+  const usage = getUsageData(input);
 
   // Async data (subprocess spawns) - run in parallel
-  const [location, usage, processes] = await Promise.all([
+  const [location, processes] = await Promise.all([
     getLocationData(input),
-    getUsageData(),
     getProcessData(),
   ]);
 

@@ -38,7 +38,7 @@
 
 ## Requirements
 
-- macOS (uses `security` for keychain access)
+- macOS (process detection uses BSD `ps`/`pgrep`/`stty` flags)
 - [Bun](https://bun.sh/) (recommended) or Node.js 18+
 - Terminal with truecolor (24-bit) support
 
@@ -101,14 +101,7 @@ Env var overrides: `STATUSLINE_DEBUG`, `TEST_MODE`, `STATUSLINE_LOG`.
 
 ## Usage data
 
-Rate limit data is fetched from the Anthropic API and cached (60s TTL, 5min backoff on failure). Degrades gracefully if no token is available.
-
-Token resolution order:
-1. `CLAUDE_CODE_OAUTH_TOKEN` environment variable
-2. Claude Code's keychain entry (`Claude Code-credentials`)
-3. `~/.claude/.credentials.json`
-
-No extra setup needed if you're logged into Claude Code.
+Rate limit data comes straight from the `rate_limits` field in the stdin JSON that Claude Code sends each render (no network, no token needed). The session/weekly bars only appear for Pro/Max subscribers, and only after the first API response of a session.
 
 ## Development
 
@@ -129,9 +122,8 @@ Built with [nib-ink](https://github.com/brenoxp/nib-ink) (Svelte 5 terminal UI r
 src/
 ├── components/     Svelte 5 components (Statusline, Location, ContextBar, ...)
 ├── lib/
-│   ├── data.ts     Data gathering (git, processes, tasks, prompt, usage)
-│   ├── theme.ts    Colors, utilities, cache helpers
-│   └── usage-fetch.ts  Anthropic API rate limit fetcher
+│   ├── data.ts     Data gathering (git, processes, tasks, prompt, rate limits)
+│   └── theme.ts    Colors, utilities, cache helpers
 └── index.ts        Entry point (stdin → renderToString → stdout)
 ```
 

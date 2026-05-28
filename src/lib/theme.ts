@@ -52,10 +52,8 @@ export function formatTokensCompact(num: number): string {
   return `${num}`;
 }
 
-export function countdownFromIso(iso: string, nowEpoch: number): string {
-  if (!iso || iso === "null") return "";
-  const epoch = Math.floor(new Date(iso).getTime() / 1000);
-  if (isNaN(epoch)) return "";
+export function countdownFromEpoch(epoch: number, nowEpoch: number): string {
+  if (!epoch || isNaN(epoch)) return "";
   const r = epoch - nowEpoch;
   if (r <= 0) return "now";
   const d = Math.floor(r / 86400);
@@ -64,6 +62,14 @@ export function countdownFromIso(iso: string, nowEpoch: number): string {
   if (d > 0) return `${d}d ${h}h`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
+}
+
+export function countdownFromIso(iso: string, nowEpoch: number): string {
+  if (!iso || iso === "null") return "";
+  return countdownFromEpoch(
+    Math.floor(new Date(iso).getTime() / 1000),
+    nowEpoch,
+  );
 }
 
 export function readFileSafe(path: string): string | null {

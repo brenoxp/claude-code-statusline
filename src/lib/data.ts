@@ -176,19 +176,38 @@ function getContextData(input: any, cacheWrite: boolean) {
 // Rate limits come straight from the stdin JSON (input.rate_limits), which Claude
 // Code populates for Pro/Max subscribers after the first API response. Each window
 // (five_hour / seven_day) may be independently absent. resets_at is epoch seconds.
+//
+// We persist the latest snapshot to disk so a new session shows the last-known
+// limits immediately, instead of rendering nothing until CC's first API response
+// of that session arrives. On input without rate_limits, we fall back to the cache.
 function getUsageData(input: any) {
-  const rateLimits = input.rate_limits;
+  const now = Math.floor(Date.now() / 1000);
+  const cacheFile = join(CACHE_DIR, "usage.json");
+
+  let rateLimits = input.rate_limits;
+  if (rateLimits) {
+    writeFileSafe(cacheFile, JSON.stringify(rateLimits) + "\n");
+  } else {
+    const cached = readFileSafe(cacheFile);
+    if (cached) {
+      try {
+        rateLimits = JSON.parse(cached);
+      } catch {}
+    }
+  }
   if (!rateLimits) return { session: null, weekly: null };
 
-  const now = Math.floor(Date.now() / 1000);
-
-  const window = (w: any) =>
-    w
-      ? {
-          pct: Math.round(w.used_percentage || 0),
-          resetCountdown: countdownFromEpoch(w.resets_at || 0, now),
-        }
-      : null;
+  const window = (w: any) => {
+    if (!w) return null;
+    const resetsAt = w.resets_at || 0;
+    // Drop windows past their reset: the limit rolled over, so a cached
+    // percentage is stale. Live input always has a future resets_at.
+    if (resetsAt && resetsAt <= now) return null;
+    return {
+      pct: Math.round(w.used_percentage || 0),
+      resetCountdown: countdownFromEpoch(resetsAt, now),
+    };
+  };
 
   return {
     session: window(rateLimits.five_hour),

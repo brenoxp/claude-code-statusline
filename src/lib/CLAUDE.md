@@ -7,7 +7,7 @@ Gathers all statusline props from stdin JSON + system state. `gatherData()` is t
 
 - `getLocationData` - cwd → path (~ substitution), git branch + diff numstat. Cached 5s
 - `getContextData` - model name (strip version suffix), context window percentage, cache write tokens (from transcript JSONL)
-- `getUsageData` - reads `input.rate_limits` (five_hour/seven_day) straight from stdin JSON. Pure, synchronous, no network. Each window may be independently absent (only present for Pro/Max subscribers after first API response)
+- `getUsageData` - reads `input.rate_limits` (five_hour/seven_day) straight from stdin JSON. Pure, synchronous, no network. Each window may be independently absent (only present for Pro/Max subscribers after first API response). Persists the latest snapshot to `usage.json` and falls back to it when input lacks rate_limits, so a new session shows the last-known limits before its first API response. Windows past their `resets_at` epoch are dropped (rolled over → stale pct)
 - `getProcessData` - `ps aux` for claude PIDs, `pgrep` children for mcp/context7. Cached 10s
 - `getTasksData` - reads `~/.claude/session-tasks/{sessionId}.json`
 - `getPromptData` - reads last 16KB of transcript JSONL, finds last user message, strips noise patterns

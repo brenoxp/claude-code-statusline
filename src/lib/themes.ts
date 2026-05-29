@@ -22,7 +22,7 @@ export const themes: Record<ThemeName, Record<string, RgbTuple>> = {
     red: [210, 60, 60],
     model: [200, 120, 70],
     label: [150, 165, 190],
-    slate: [100, 110, 130],
+    slate: [130, 142, 168],
     purple: [160, 140, 220],
     muted: [205, 210, 218],
     prompt: [160, 175, 195],

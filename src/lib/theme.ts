@@ -15,7 +15,7 @@ export const theme = {
   red: [210, 60, 60] as RgbTuple,
   model: [200, 120, 70] as RgbTuple,
   label: [150, 165, 190] as RgbTuple,
-  slate: [100, 110, 130] as RgbTuple,
+  slate: [130, 142, 168] as RgbTuple,
   purple: [160, 140, 220] as RgbTuple,
   muted: [205, 210, 218] as RgbTuple,
   prompt: [160, 175, 195] as RgbTuple,

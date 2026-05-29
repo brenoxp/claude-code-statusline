@@ -7,6 +7,11 @@
   "bin": {
     "cc-statusline": "bin/cc-statusline"
   },
+  "files": [
+    "dist/",
+    "bin/",
+    "settings.json"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

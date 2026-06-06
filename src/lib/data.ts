@@ -312,31 +312,52 @@ const NOISE_PATTERNS = [
   "Caveat: The messages below",
 ];
 
+function readTail(path: string, tailBytes: number, fileSize: number): string {
+  if (fileSize <= tailBytes) return readFileSync(path, "utf8");
+  const fd = openSync(path, "r");
+  const buf = Buffer.alloc(tailBytes);
+  readSync(fd, buf, 0, tailBytes, fileSize - tailBytes);
+  closeSync(fd);
+  let raw = buf.toString("utf8");
+  // drop the first (likely partial) line
+  const nl = raw.indexOf("\n");
+  if (nl >= 0) raw = raw.slice(nl + 1);
+  return raw;
+}
+
 function getPromptData(input: any) {
   const transcriptPath = input.transcript_path;
   if (!transcriptPath) return { promptText: null, isVoice: false };
 
   const resolved = transcriptPath.replace(/^~/, process.env.HOME || "");
 
-  let raw: string;
+  // Big tool results / thinking blocks can push the last user prompt far
+  // from the end of the transcript, so widen the tail until we find one.
+  const TAIL_SIZES = [16384, 65536, 262144, 1048576];
+  let fileSize: number;
   try {
-    const stat = statSync(resolved);
-    const TAIL_BYTES = 16384;
-    if (stat.size > TAIL_BYTES) {
-      const fd = openSync(resolved, "r");
-      const buf = Buffer.alloc(TAIL_BYTES);
-      readSync(fd, buf, 0, TAIL_BYTES, stat.size - TAIL_BYTES);
-      closeSync(fd);
-      raw = buf.toString("utf8");
-      const nl = raw.indexOf("\n");
-      if (nl >= 0) raw = raw.slice(nl + 1);
-    } else {
-      raw = readFileSync(resolved, "utf8");
-    }
+    fileSize = statSync(resolved).size;
   } catch {
     return { promptText: null, isVoice: false };
   }
 
+  for (const tailBytes of TAIL_SIZES) {
+    let raw: string;
+    try {
+      raw = readTail(resolved, tailBytes, fileSize);
+    } catch {
+      return { promptText: null, isVoice: false };
+    }
+
+    const result = scanForPrompt(raw);
+    if (result) return result;
+    if (tailBytes >= fileSize) break; // whole file scanned, nothing there
+  }
+
+  return { promptText: null, isVoice: false };
+}
+
+function scanForPrompt(raw: string) {
   const lines = raw.trimEnd().split("\n");
 
   for (let i = lines.length - 1; i >= 0; i--) {
@@ -372,7 +393,7 @@ function getPromptData(input: any) {
     return { promptText: text, isVoice };
   }
 
-  return { promptText: null, isVoice: false };
+  return null;
 }
 
 export async function gatherData(

@@ -41,6 +41,7 @@ export interface StatuslineProps {
   contextPct: number;
   tokenCount: number;
   cacheWriteTokens: number;
+  costUsd: number | null;
   // Usage limits (from input.rate_limits)
   session: {
     pct: number;
@@ -170,7 +171,18 @@ function getContextData(input: any, cacheWrite: boolean) {
     ? sumSessionCacheTokens(input.transcript_path)
     : 0;
 
-  return { modelName, contextPct, tokenCount: totalUsed, cacheWriteTokens };
+  const costUsd =
+    typeof input.cost?.total_cost_usd === "number"
+      ? input.cost.total_cost_usd
+      : null;
+
+  return {
+    modelName,
+    contextPct,
+    tokenCount: totalUsed,
+    cacheWriteTokens,
+    costUsd,
+  };
 }
 
 // Rate limits come straight from the stdin JSON (input.rate_limits), which Claude

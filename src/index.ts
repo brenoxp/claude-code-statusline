@@ -27,7 +27,7 @@ import { homedir } from "node:os";
 import { renderToString, setTheme } from "nib-ink";
 import Statusline from "./components/Statusline.svelte";
 import { gatherData } from "./lib/data";
-import { formatTokensCompact, applyTheme } from "./lib/theme";
+import { formatTokensCompact, formatCostUsd, applyTheme } from "./lib/theme";
 import { checkForUpdates } from "./lib/update-check";
 
 // Baked in at build time via esbuild `define` (see build.ts). Avoids a runtime
@@ -267,6 +267,8 @@ async function main() {
     (data.tokenCount ? String(data.tokenCount).length + 1 : 0);
   if (data.cacheWriteTokens > 0)
     ctxWidth += 2 + 1 + formatTokensCompact(data.cacheWriteTokens).length;
+  if (data.costUsd != null && data.costUsd > 0)
+    ctxWidth += 2 + formatCostUsd(data.costUsd).length;
   lineWidths.push(ctxWidth);
   // Session/Weekly: label(8) + gap(2) + bar(21) + gap(2) + pct(4) + gap(2) + countdown
   if (data.session) {

@@ -1,9 +1,16 @@
 <script>
   import { Box, Text } from "nib-ink";
   import ProgressBar from "./ProgressBar.svelte";
-  import { theme, toRgb, ctxRgb, formatTokensCompact } from "../lib/theme";
+  import {
+    theme,
+    toRgb,
+    ctxRgb,
+    formatTokensCompact,
+    formatCostUsd,
+  } from "../lib/theme";
 
-  let { modelName, contextPct, tokenCount, cacheWriteTokens } = $props();
+  let { modelName, contextPct, tokenCount, cacheWriteTokens, costUsd } =
+    $props();
 
   const [cr, cg, cb] = ctxRgb(contextPct);
   const pctFmt = String(contextPct).padStart(3) + "%";
@@ -11,6 +18,7 @@
   const compact = formatTokensCompact(tokenCount);
   const cacheWrite =
     cacheWriteTokens > 0 ? `✎${formatTokensCompact(cacheWriteTokens)}` : null;
+  const cost = costUsd != null && costUsd > 0 ? formatCostUsd(costUsd) : null;
 </script>
 
 <Box flexDirection="row" gap={2}>
@@ -31,6 +39,12 @@
     <Box flexShrink={1}
       ><Text wrap="truncate" color={toRgb(theme.slate)} dimColor
         >{cacheWrite}</Text
+      ></Box
+    >
+  {/if}
+  {#if cost}
+    <Box flexShrink={1}
+      ><Text wrap="truncate" color={toRgb(theme.slate)} dimColor>{cost}</Text
       ></Box
     >
   {/if}

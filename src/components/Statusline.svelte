@@ -17,6 +17,7 @@
     contextPct,
     tokenCount,
     cacheWriteTokens,
+    costUsd,
     session,
     weekly,
     cliCount,
@@ -41,7 +42,13 @@
 
 <Box flexDirection="column" width={maxWidth}>
   <Location {path} {branch} {additions} {deletions} {maxWidth} />
-  <ContextBar {modelName} {contextPct} {tokenCount} {cacheWriteTokens} />
+  <ContextBar
+    {modelName}
+    {contextPct}
+    {tokenCount}
+    {cacheWriteTokens}
+    {costUsd}
+  />
   {#if session || weekly}
     <UsageLimits {session} {weekly} />
   {/if}

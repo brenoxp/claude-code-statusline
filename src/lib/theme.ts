@@ -76,6 +76,10 @@ export function rateRgb(pct: number): RgbTuple {
   return thresholdRgb(pct, [50, 70, 90]);
 }
 
+export function formatCostUsd(usd: number): string {
+  return `$${usd.toFixed(2)}`;
+}
+
 export function formatTokensCompact(num: number): string {
   if (num >= 1_000_000) {
     const d = Math.floor((num * 10) / 1_000_000);

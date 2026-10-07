@@ -56,6 +56,7 @@ Packaged `settings.json` (dev/legacy fallback, runtime config, env overrides):
 - `log` (false) - save stdin JSON to logs/. Env: `STATUSLINE_LOG`
 
 ## Repo
-- GitHub: github.com/brenoxp/claude-code-statusline
+- GitHub: github.com/brenoxp/claude-code-statusline (public)
+- npm: `@brenoxp/cc-statusline`
 
 @docs/index.md

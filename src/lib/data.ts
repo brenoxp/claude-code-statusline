@@ -130,7 +130,13 @@ async function getLocationData(input: any) {
   return { path, branch, additions, deletions };
 }
 
-function sumSessionCacheTokens(transcriptPath: string | undefined): number {
+// Claude Code writes one API response as several transcript lines (one per
+// content block), all sharing the same message.id and each repeating the full
+// usage. Each response counts once, using the usage of its last line (the final
+// snapshot). Lines without a message.id count as-is.
+export function sumSessionCacheTokens(
+  transcriptPath: string | undefined,
+): number {
   if (!transcriptPath) return 0;
   const resolved = transcriptPath.replace(/^~/, process.env.HOME || "");
 
@@ -141,14 +147,21 @@ function sumSessionCacheTokens(transcriptPath: string | undefined): number {
     return 0;
   }
 
-  let total = 0;
+  const cacheTokensByMessageId = new Map<string, number>();
+  let unidentifiedTotal = 0;
   for (const line of raw.split("\n")) {
     if (!line || !line.includes("cache_creation_input_tokens")) continue;
     try {
       const entry = JSON.parse(line);
-      total += entry.message?.usage?.cache_creation_input_tokens || 0;
+      const cacheTokens = entry.message?.usage?.cache_creation_input_tokens || 0;
+      const messageId = entry.message?.id;
+      if (messageId) cacheTokensByMessageId.set(messageId, cacheTokens);
+      else unidentifiedTotal += cacheTokens;
     } catch {}
   }
+
+  let total = unidentifiedTotal;
+  for (const cacheTokens of cacheTokensByMessageId.values()) total += cacheTokens;
   return total;
 }
 
